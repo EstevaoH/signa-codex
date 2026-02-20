@@ -23,6 +23,7 @@ import {
 
 import { CharacterFormDialog } from "@/components/character-form-dialog"
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { UserMenu } from "@/components/user-menu"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -405,18 +406,13 @@ export default function Dashboard() {
                     <p className="text-slate-400 mt-2">Gerencie suas mesas e aventuras.</p>
                 </div>
 
-                <div className="flex gap-3">
-                    <Link href="/settings/profile">
-                        <Button variant="outline" className="border-slate-700 bg-slate-900 hover:bg-slate-800 hover:text-amber-500 cursor-pointer font-bold">
-                            <User className="mr-2 h-4 w-4" /> Perfil
-                        </Button>
-                    </Link>
+                <div className="flex items-center gap-3">
                     <Link href="/codex">
-                        <Button variant="outline" className="border-slate-700 bg-slate-900 hover:bg-slate-800 hover:text-amber-500 cursor-pointer font-bold">
+                        <Button variant="outline" className="border-slate-700 bg-slate-900 hover:bg-slate-800 hover:text-amber-500 cursor-pointer font-bold hidden md:flex">
                             <ScrollText className="mr-2 h-4 w-4" /> Cânone
                         </Button>
                     </Link>
-                    <Button variant="outline" className="border-slate-700 bg-slate-900 hover:bg-slate-800 hover:text-amber-500 cursor-pointer font-bold">
+                    <Button variant="outline" className="border-slate-700 bg-slate-900 hover:bg-slate-800 hover:text-amber-500 cursor-pointer font-bold hidden lg:flex">
                         <Search className="mr-2 h-4 w-4" /> Buscar Mesa
                     </Button>
                     <Link href="/campaigns/new">
@@ -424,13 +420,10 @@ export default function Dashboard() {
                             <Plus className="mr-2 h-4 w-4" /> Nova Campanha
                         </Button>
                     </Link>
-                    <Button
-                        variant="destructive"
-                        onClick={handleLogout}
-                        className="bg-red-950/30 border border-red-900/50 hover:bg-red-900/50 text-red-500 cursor-pointer font-bold"
-                    >
-                        <LogOut className="h-4 w-4" />
-                    </Button>
+
+                    <div className="h-8 w-px bg-slate-800 mx-2 hidden md:block" />
+
+                    <UserMenu />
                 </div>
             </header>
 

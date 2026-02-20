@@ -36,7 +36,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 const profileSchema = z.object({
     username: z.string().min(3, "O nome de usuário deve ter pelo menos 3 caracteres"),
     full_name: z.string().min(3, "O nome completo deve ter pelo menos 3 caracteres"),
+    email: z.string().email("E-mail inválido").optional(),
     avatar_url: z.string().url("URL de avatar inválida").or(z.literal("")),
+    banner_url: z.string().url("URL de banner inválida").or(z.literal("")),
 })
 
 type ProfileFormValues = z.infer<typeof profileSchema>
@@ -53,7 +55,9 @@ export default function ProfileSettingsPage() {
         defaultValues: {
             username: "",
             full_name: "",
+            email: "",
             avatar_url: "",
+            banner_url: "",
         },
     })
 
@@ -76,7 +80,9 @@ export default function ProfileSettingsPage() {
                 form.reset({
                     username: profile.username || "",
                     full_name: profile.full_name || "",
+                    email: user.email || "",
                     avatar_url: profile.avatar_url || "",
+                    banner_url: profile.banner_url || "",
                 })
             }
             setIsLoading(false)
@@ -94,6 +100,7 @@ export default function ProfileSettingsPage() {
                     username: values.username,
                     full_name: values.full_name,
                     avatar_url: values.avatar_url,
+                    banner_url: values.banner_url,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', user.id)
@@ -147,7 +154,18 @@ export default function ProfileSettingsPage() {
                 </div>
 
                 <Card className="bg-slate-900 border-slate-800 shadow-2xl overflow-hidden">
-                    <div className="h-32 bg-gradient-to-r from-amber-600/20 to-slate-800" />
+                    <div className="h-40 relative overflow-hidden bg-slate-800">
+                        {form.watch("banner_url") ? (
+                            <img
+                                src={form.watch("banner_url")}
+                                alt="Banner"
+                                className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-r from-amber-600/20 to-slate-800" />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent opacity-60" />
+                    </div>
                     <div className="px-6 -mt-12 mb-6">
                         <div className="relative inline-block">
                             <Avatar className="h-24 w-24 border-4 border-slate-900 shadow-xl">
@@ -188,6 +206,28 @@ export default function ProfileSettingsPage() {
 
                                     <FormField
                                         control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-slate-300 uppercase text-[10px] font-bold tracking-widest flex items-center gap-2">
+                                                    <AtSign className="h-3 w-3 text-amber-500" /> Correio Eletrônico (E-mail)
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        readOnly
+                                                        className="bg-slate-950/50 border-slate-800 focus:border-slate-800 h-11 text-slate-500 cursor-not-allowed opacity-70"
+                                                    />
+                                                </FormControl>
+                                                <FormDescription className="text-[9px] text-slate-600">
+                                                    Identificador único da sua conta. Não pode ser alterado por aqui.
+                                                </FormDescription>
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
                                         name="username"
                                         render={({ field }) => (
                                             <FormItem>
@@ -205,30 +245,50 @@ export default function ProfileSettingsPage() {
                                             </FormItem>
                                         )}
                                     />
-                                </div>
 
-                                <FormField
-                                    control={form.control}
-                                    name="avatar_url"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-slate-300 uppercase text-[10px] font-bold tracking-widest flex items-center gap-2">
-                                                <ImageIcon className="h-3 w-3 text-amber-500" /> URL do Retrato (Avatar)
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="https://..."
-                                                    {...field}
-                                                    className="bg-slate-950 border-slate-800 focus:border-amber-500 h-11 text-slate-100"
-                                                />
-                                            </FormControl>
-                                            <FormDescription className="text-[10px] text-slate-500 italic">
-                                                Use uma URL de imagem para o seu retrato. Recomendamos imagens quadradas.
-                                            </FormDescription>
-                                            <FormMessage className="text-red-500 text-[10px]" />
-                                        </FormItem>
-                                    )}
-                                />
+                                    <FormField
+                                        control={form.control}
+                                        name="avatar_url"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-slate-300 uppercase text-[10px] font-bold tracking-widest flex items-center gap-2">
+                                                    <ImageIcon className="h-3 w-3 text-amber-500" /> URL do Retrato (Avatar)
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="https://..."
+                                                        {...field}
+                                                        className="bg-slate-950 border-slate-800 focus:border-amber-500 h-11 text-slate-100"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage className="text-red-500 text-[10px]" />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="banner_url"
+                                        render={({ field }) => (
+                                            <FormItem className="md:col-span-2">
+                                                <FormLabel className="text-slate-300 uppercase text-[10px] font-bold tracking-widest flex items-center gap-2">
+                                                    <ImageIcon className="h-3 w-3 text-amber-500" /> URL do Estandarte (Banner)
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="https://..."
+                                                        {...field}
+                                                        className="bg-slate-950 border-slate-800 focus:border-amber-500 h-11 text-slate-100"
+                                                    />
+                                                </FormControl>
+                                                <FormDescription className="text-[10px] text-slate-500 italic">
+                                                    Personalize o topo do seu perfil com uma imagem épica.
+                                                </FormDescription>
+                                                <FormMessage className="text-red-500 text-[10px]" />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
 
                                 <div className="pt-4 border-t border-slate-800 flex justify-end">
                                     <Button

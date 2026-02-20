@@ -12,6 +12,7 @@ CREATE TABLE profiles (
   username text UNIQUE,
   full_name text,
   avatar_url text,
+  banner_url text,
   constraint username_length check (char_length(username) >= 3)
 );
 

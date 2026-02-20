@@ -13,7 +13,6 @@ import {
     Trophy,
     Plus,
     Search,
-    Sword,
     ScrollText,
     ArrowLeft,
     ArrowRight,
@@ -21,8 +20,18 @@ import {
     Eye,
     EyeOff,
     Mail,
-    X
+    X,
+    LogOut,
+    User,
+    Shield,
+    CheckCircle2,
+    Dice5,
+    Pencil,
+    Trash2,
+    Sword
 } from "lucide-react"
+
+import { UserMenu } from "@/components/user-menu"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,6 +46,7 @@ import { EntityDetailsDialog } from "@/components/entity-details-dialog"
 import { CampaignInviteDialog } from "@/components/campaign-invite-dialog"
 
 import { supabase } from "@/lib/supabase"
+import { toast } from "@/hooks/use-toast"
 // import { Item } from "@/shared/types/item"
 
 // Type definitions could be moved to shared/types but kept here for now or inferred
@@ -69,21 +79,64 @@ export default function CampaignDashboard() {
     })
     const [pendingInvites, setPendingInvites] = useState<any[]>([])
 
-    const [hiddenEntities, setHiddenEntities] = useState<Set<string>>(new Set())
     const [deadMonsters, setDeadMonsters] = useState<Set<string>>(new Set()) // Changed to string UUIDs
 
     // ... (keep visibility toggles, update IDs to string if needed)
-    const toggleEntityVisibility = (type: string, id: string) => { // id is uuid string
-        const key = `${type}-${id}`
-        setHiddenEntities(prev => {
-            const newSet = new Set(prev)
-            if (newSet.has(key)) newSet.delete(key)
-            else newSet.add(key)
-            return newSet
-        })
+    const toggleEntityVisibility = async (type: string, id: string) => {
+        const isCurrentlyVisible = !isEntityHidden(type, id)
+        const newVisibility = !isCurrentlyVisible
+
+        try {
+            let table = ''
+            let query: any
+
+            if (type === 'monstro') {
+                table = 'campaign_monsters'
+                query = supabase.from(table).update({ is_visible: newVisibility }).eq('campaign_id', campaignId).eq('monster_id', id)
+            } else if (type === 'item') {
+                table = 'items'
+                query = supabase.from(table).update({ is_visible: newVisibility }).eq('id', id)
+            } else if (type === 'local') {
+                table = 'locations'
+                query = supabase.from(table).update({ is_visible: newVisibility }).eq('id', id)
+            } else if (type === 'npc') {
+                table = 'npcs'
+                query = supabase.from(table).update({ is_visible: newVisibility }).eq('id', id)
+            }
+
+            const { error } = await query
+            if (error) throw error
+
+            // Update local state
+            setData(prev => ({
+                ...prev,
+                monstros: type === 'monstro' ? prev.monstros.map(m => m.id === id ? { ...m, is_revealed: newVisibility } : m) : prev.monstros,
+                itens: type === 'item' ? prev.itens.map(i => i.id === id ? { ...i, is_visible: newVisibility } : i) : prev.itens,
+                localidades: type === 'local' ? prev.localidades.map(l => l.id === id ? { ...l, is_visible: newVisibility } : l) : prev.localidades,
+                npcs: type === 'npc' ? prev.npcs.map(n => n.id === id ? { ...n, is_visible: newVisibility } : n) : prev.npcs,
+            }))
+
+            toast({
+                title: newVisibility ? "Conteúdo Revelado" : "Conteúdo Ocultado",
+                description: `O item agora está ${newVisibility ? 'visível' : 'oculto'} para os jogadores.`,
+            })
+        } catch (error) {
+            console.error("Erro ao alterar visibilidade:", error)
+            toast({
+                title: "Erro ao alterar visibilidade",
+                description: "Não foi possível salvar a alteração no banco de dados.",
+                variant: "destructive"
+            })
+        }
     }
 
-    const isEntityHidden = (type: string, id: string) => hiddenEntities.has(`${type}-${id}`)
+    const isEntityHidden = (type: string, id: string) => {
+        if (type === 'monstro') return !data.monstros.find(m => m.id === id)?.is_revealed
+        if (type === 'item') return !data.itens.find(i => i.id === id)?.is_visible
+        if (type === 'local') return !data.localidades.find(l => l.id === id)?.is_visible
+        if (type === 'npc') return !data.npcs.find(n => n.id === id)?.is_visible
+        return false
+    }
 
     const toggleMonsterDeath = (id: string) => {
         setDeadMonsters(prev => {
@@ -213,17 +266,17 @@ export default function CampaignDashboard() {
                 // Map monsters to flatten stats structure for UI
                 const mappedMonsters = (monstersData || []).map((entry: any) => {
                     const m = entry.monsters
+                    if (!m) return null
                     return {
                         ...m,
-                        hp: "??",
-                        cr: "??",
-                        ac: "??",
-                        // Ensure other fields are present
-                        tipo: '??',
-                        nome: "m.name",
-                        is_revealed: false // Use visibility from campaign_monsters
+                        hp: m.stats?.hp || "??",
+                        cr: m.challenge_rating || "??",
+                        ac: m.stats?.ac || "??",
+                        tipo: m.type || '??',
+                        nome: m.name,
+                        is_revealed: entry.is_visible
                     }
-                })
+                }).filter(Boolean)
 
                 // Transform participants to 'jogadores' shape
                 const mappedPlayers = (participants || []).map((p: any) => ({
@@ -339,8 +392,8 @@ export default function CampaignDashboard() {
                             <Badge variant="outline" className="text-xs border-slate-700">{campaign.genre}</Badge>
                         </div>
                     </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" className="border-slate-700 bg-slate-900 hover:bg-slate-800 text-amber-500">
+                    <div className="flex items-center gap-3">
+                        <Button variant="outline" className="border-slate-700 bg-slate-900 hover:bg-slate-800 text-amber-500 hidden md:flex">
                             <Search className="mr-2 h-4 w-4" /> Buscar no Cânone
                         </Button>
                         {isMaster && (
@@ -348,6 +401,8 @@ export default function CampaignDashboard() {
                                 <Plus className="mr-2 h-4 w-4" /> Novo Conteúdo
                             </Button>
                         )}
+                        <div className="h-8 w-px bg-slate-800 mx-2 hidden md:block" />
+                        <UserMenu />
                     </div>
                 </div>
             </header>
