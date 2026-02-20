@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirme sua Jornada</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f172a;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    .header {
+      background-color: #0f172a;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #d97706;
+    }
+    .header h1 {
+      color: #d97706;
+      margin: 0;
+      font-size: 24px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .content {
+      padding: 30px;
+      text-align: center;
+    }
+    .icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    p {
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+    .btn {
+      display: inline-block;
+      background-color: #d97706;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #b45309;
+    }
+    .footer {
+      background-color: #0f172a;
+      padding: 15px;
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+      border-top: 1px solid #334155;
+    }
+    .link-text {
+      color: #d97706;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div style="padding: 20px;">
+    <div class="container">
+      <div class="header">
+        <h1>Signa Codex</h1>
+      </div>
+      <div class="content">
+        <div class="icon">📜</div>
+        <h2 style="color: #f1f5f9; margin-top: 0;">Saudações, Viajante!</h2>
+        <p>Sua ficha de aventureiro foi preenchida, mas precisamos verificar se este corvo chegou ao destino correto.</p>
+        <p>Clique no selo abaixo para confirmar sua identidade e ter acesso aos segredos da guilda.</p>
+        
+        <a href="{{ .ConfirmationURL }}" class="btn">Confirmar E-mail</a>
+        
+        <p style="margin-top: 30px; font-size: 14px;">Ou copie este pergaminho mágico no seu navegador:</p>
+        <p class="link-text" style="font-size: 12px;">{{ .ConfirmationURL }}</p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2024 Signa Codex. Que seus dados rolem sempre 20.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
